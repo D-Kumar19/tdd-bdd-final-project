@@ -75,6 +75,36 @@ def step_impl(context, element_name):
     element = context.driver.find_element(By.ID, element_id)
     assert(element.get_attribute('value') == u'')
 
+@when(u'I press the "{button}" button')
+def step_impl(context, button):
+    button_name = button.lower() + '-btn'
+    element = WebDriverWait(context.driver, context.wait_seconds).until(
+        expected_conditions.element_to_be_clickable((By.ID, button_name))
+    )
+    element.click()
+
+@then(u'I should see the message "{message}"')
+def step_impl(context, message):
+    element = WebDriverWait(context.driver, context.wait_seconds).until(
+        expected_conditions.text_to_be_present_in_element((By.ID, 'flash_message'))
+    )
+    assert(message in element.text)
+
+@then(u'I should see "{product}" in the results')
+def step_impl(context, product):
+    element = WebDriverWait(context.driver, context.wait_seconds).until(
+        expected_conditions.presence_of_element_located((By.ID, 'search_results'))
+    )
+    assert(product in element.text)
+
+@then(u'I should not see "{product}" in the results')
+def step_impl(context, product):
+    element = WebDriverWait(context.driver, context.wait_seconds).until(
+        expected_conditions.presence_of_element_located((By.ID, 'search_results'))
+    )
+    assert(product not in element.text)
+
+
 ##################################################################
 # These two function simulate copy and paste
 ##################################################################

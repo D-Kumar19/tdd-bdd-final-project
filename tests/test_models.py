@@ -104,3 +104,128 @@ class TestProductModel(unittest.TestCase):
     #
     # ADD YOUR TEST CASES HERE
     #
+    def test_read_a_product(self):
+        """Create a product and read it"""
+        product = ProductFactory()
+        logging.info(f'Product created by Faker: {product}')
+
+        product.id = None
+        product.create()
+        logging.info(f'Product added to DB: {product}')
+        self.assertIsNotNone(product.id)
+
+        new_product = Product.find(product.id)
+        self.assertEqual(new_product.id, product.id)
+        self.assertEqual(new_product.name, product.name)
+        self.assertEqual(new_product.description, product.description)
+        self.assertEqual(Decimal(new_product.price), product.price)
+        self.assertEqual(new_product.available, product.available)
+        self.assertEqual(new_product.category, product.category)
+
+
+    def test_update_a_product(self):
+        """Create a product and update it"""
+        product = ProductFactory()
+        logging.info(f'Product created by Faker: {product}')
+
+        product.id = None
+        product.create()
+        logging.info(f'Product added to DB: {product}')
+        self.assertIsNotNone(product.id)
+
+        description = "testing"
+        product.description = description
+        product_id = product.id
+        product.update()
+        self.assertEqual(product_id, product.id)
+        self.assertEqual(description, product.description)
+
+        products = Product.all()
+        self.assertEqual(len(products), 1)
+        self.assertEqual(product_id, products[0].id)
+        self.assertEqual(description, products[0].description)
+
+
+    def test_delete_a_product(self):
+        """Create a product and deletes it"""
+        product = ProductFactory()
+        logging.info(f'Product created by Faker: {product}')
+
+        product.create()
+        logging.info(f'Product added to DB: {product}')
+        self.assertIsNotNone(product.id)
+
+        products = Product.all()
+        self.assertEqual(len(products), 1)
+
+        product.delete()
+        products = Product.all()
+        self.assertEqual(len(products), 0)
+
+
+    def test_create_multiple_product(self):
+        """Create multiple products and deletes it"""
+        products = Product.all()
+        self.assertEqual(products, [])
+
+        for _ in range(5):
+            product = ProductFactory()
+            logging.info(f'Product created by Faker: {product}')
+            product.create()
+            logging.info(f'Product added to DB: {product}')
+
+        products = Product.all()
+        self.assertEqual(len(products), 5)
+
+
+    def test_find_product_by_name(self):
+        """Find product by name"""
+        products = ProductFactory.create_batch(5)
+        for product in products:
+            logging.info(f'Product created by Faker: {product}')
+            product.create()
+            logging.info(f'Product added to DB: {product}')
+
+        name = products[0].name
+        count = sum(1 for product in products if product.name == name)
+        find_by_products_name = Product.find_by_name(name)
+        self.assertEqual(find_by_products_name.count(), count)
+
+        for product in find_by_products_name:
+            self.assertEqual(product.name, name)
+
+
+    def test_product_by_availability(self):
+        """Find product by availability"""
+        products = ProductFactory.create_batch(10)
+        for product in products:
+            logging.info(f'Product created by Faker: {product}')
+            product.create()
+            logging.info(f'Product added to DB: {product}')
+
+        available = products[0].available
+        count = sum(1 for product in products if product.available == available)
+
+        find_by_products_availability = Product.find_by_availability(available)
+        self.assertEqual(find_by_products_availability.count(), count)
+
+        for product in find_by_products_availability:
+            self.assertEqual(product.available, available)
+
+
+    def test_product_by_category(self):
+        """Find product by category"""
+        products = ProductFactory.create_batch(10)
+        for product in products:
+            logging.info(f'Product created by Faker: {product}')
+            product.create()
+            logging.info(f'Product added to DB: {product}')
+
+        category = products[0].category
+        count = sum(1 for product in products if product.category == category)
+
+        find_by_products_category = Product.find_by_category(category)
+        self.assertEqual(find_by_products_category.count(), count)
+
+        for product in find_by_products_category:
+            self.assertEqual(product.category, category)
